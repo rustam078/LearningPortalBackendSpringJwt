@@ -15,6 +15,11 @@ import com.voicera.user.User;
 @CrossOrigin
 public class AddSkillController {
 
+	
+	  @GetMapping("/")
+	  public ResponseEntity<String> TestApp() {
+		  return ResponseEntity.ok("Hello welcome to learning portal");
+	  }
 
   @GetMapping("/skill")
   public ResponseEntity<List<Skill>> sayHellotest() {
