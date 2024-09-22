@@ -1,3 +1,7 @@
+app:
+  baseUrl: https://mpairavat.in/learningPortal
+
+
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -12,14 +16,40 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
     show-sql: true
+#outh2 google login        
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: #**************************
+            client-secret: #*************************
+            redirect-uri: "${app.baseUrl}/login/oauth2/code/google"
+            scope: email,profile
+            authorization-grant-type: authorization_code
+          github:
+            client-id: #*****************************
+            client-secret: #****************************
+            redirect-uri: "${app.baseUrl}/login/oauth2/code/github"
+            scope: read:user, user:email
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo  
 
+
+#ui.domain.path: http://localhost:3000/
+ui.domain.path: https://mpairavat.in/lp
+#https://lpapp.vercel.app
+# https://mpairavat.in/learningPortal
 application:
   security:
     jwt:
       secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
       expiration: 86400000 # a day
    
-LearningAppBaseUrl: https://app.voicera-analytics.com/vtaAdmin/   
+  
 # /api-docs endpoint custom path
 springdoc:
   packages-to-scan: com.voicera

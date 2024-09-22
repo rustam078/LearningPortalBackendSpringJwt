@@ -37,7 +37,7 @@ public class AddSkillController {
   }
   
   
-  @GetMapping("/user-info")
+  @GetMapping("/user-infoo")
   public String getUserInfo(Authentication authentication) {
       if (authentication != null) {
     	  User userDetails = (User) authentication.getPrincipal();

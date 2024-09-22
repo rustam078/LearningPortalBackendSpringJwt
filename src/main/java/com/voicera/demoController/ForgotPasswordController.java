@@ -6,9 +6,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,7 +21,6 @@ import com.voicera.utils.SendOtp;
 
 
 @RestController
-@CrossOrigin
 public class ForgotPasswordController {
 	
 	@Autowired
@@ -37,9 +34,6 @@ public class ForgotPasswordController {
 	@Autowired
 	private  PasswordEncoder passwordEncoder;
 
-	
-	@Value("${LearningAppBaseUrl}")
-	private String baseUrl;
 	
 	 private static final ConcurrentHashMap<String, String> otpMap = new ConcurrentHashMap<>();
 	    
@@ -96,7 +90,7 @@ public class ForgotPasswordController {
 				if (!mailBody.isEmpty()) {
 					return mailBody.replace("{email}", email)
 							.replace("{otp}",String.valueOf(otp))
-							.replace("{portalUrl}", "https://learning-portal-front-endwith-react-spring.vercel.app/forgetPassword/?email="+email);
+							.replace("{portalUrl}", "https://mpairavat.in/lp/forgetPassword/?email="+email);
 				}
 
 				return "";
@@ -106,7 +100,7 @@ public class ForgotPasswordController {
 			}
 		}
 	
-		return "<b>Voicera Assessment Invite</b><br/> Something went wrong, please contact to HR.";
+		return "<b>password changed Invite</b><br/> Something went wrong, please try after sometime.";
 	}
 
 }

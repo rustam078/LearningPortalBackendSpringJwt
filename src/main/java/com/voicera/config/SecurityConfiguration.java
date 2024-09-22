@@ -1,16 +1,20 @@
 package com.voicera.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+
+import com.voicera.service.CustomOAuth2UserService;
+//import com.voicera.service.OAuth2LoginSuccessHandler;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,30 +26,37 @@ public class SecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
     private final LogoutHandler logoutHandler;
-	private final InvalidUserAuthEntryPoint invalidUserAuthEntryPoint;
+    private final InvalidUserAuthEntryPoint invalidUserAuthEntryPoint;
+    private final CustomOAuth2UserService customOAuth2UserService;
+
+    @Value("${ui.domain.path}")
+    private String uiPath;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http.csrf(AbstractHttpConfigurer ::disable)
+        return http.cors(Customizer.withDefaults())
+        		.csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authorize -> authorize
-            		.requestMatchers("/api/v1/auth/**" ,"/v2/api-docs","/v2/api-docs/**", "/v3/api-docs", "/v3/api-docs/**","/v3/api-docs.yaml",  "/swagger-resources",
-            			    "/swagger-resources/**", "/configuration/ui", "/configuration/security", "/swagger-ui/**","/swagger-ui.html","/swagger-ui/index.html",
-            			    "/webjars/**", "/swagger-ui.html","/api-docs/**","/forgetPassword/**","/updatePassword").permitAll()
-                .requestMatchers("/test", "/skill", "/user", "/add", "/view").hasAnyAuthority("ADMIN", "USER") // Require ADMIN or USER role for these endpoints
-                .anyRequest().authenticated() // All other requests require authentication
-            )
-         // Exception details
-		     .exceptionHandling(config->config.authenticationEntryPoint(invalidUserAuthEntryPoint))
-		     .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			// register filter for 2nd request onwards
-
-            .authenticationProvider(authenticationProvider) // Set authentication provider
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class) // Add JWT filter before UsernamePasswordAuthenticationFilter
-			.logout(logout->logout.logoutUrl("/api/v1/auth/logout")
-                .addLogoutHandler(logoutHandler) // Add logout handler
-                .logoutSuccessHandler((request, response, authentication) ->
-                    SecurityContextHolder.clearContext() // Clear security context on successful logout
-                ))
+                .requestMatchers("/api/v1/auth/**", "/swagger-ui/**", "/v3/api-docs/**", 
+                                 "/forgetPassword/**", "/updatePassword", 
+                                 "/oauthSignin", "/user-info", 
+                                 "/oauth2/**").permitAll()
+//                .requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
+                .requestMatchers("/test", "/skill", "/user", "/add", "/view")
+                    .hasAnyAuthority("ADMIN", "USER")
+                .anyRequest().authenticated())
+            .oauth2Login(oauth2 -> oauth2
+            	.defaultSuccessUrl(uiPath)
+                .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService)))
+            .exceptionHandling(config -> config.authenticationEntryPoint(invalidUserAuthEntryPoint))
+//            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authenticationProvider(authenticationProvider)
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+            .logout(logout -> logout.logoutUrl("/api/v1/auth/logout")
+                .addLogoutHandler(logoutHandler)
+                .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext()))
             .build();
     }
+
+    
 }
