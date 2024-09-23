@@ -1,6 +1,7 @@
 package com.voicera.authController;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
@@ -81,4 +82,13 @@ public class AuthenticationService {
 		return repository.existsByEmail(email);
 	}
 
+	
+	public Optional<Token> findByToken(String token) {
+		try {
+			return tokenRepository.findByToken(token);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Optional.empty();
+		}
+	}
 }

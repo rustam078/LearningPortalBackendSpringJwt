@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,7 +34,8 @@ public class ForgotPasswordController {
 	private FileUtils fileUtils;
 	@Autowired
 	private  PasswordEncoder passwordEncoder;
-
+	   @Value("${ui.domain.path}")
+	    private String uiPath;
 	
 	 private static final ConcurrentHashMap<String, String> otpMap = new ConcurrentHashMap<>();
 	    
@@ -90,7 +92,7 @@ public class ForgotPasswordController {
 				if (!mailBody.isEmpty()) {
 					return mailBody.replace("{email}", email)
 							.replace("{otp}",String.valueOf(otp))
-							.replace("{portalUrl}", "https://mpairavat.in/lp/forgetPassword/?email="+email);
+							.replace("{portalUrl}", uiPath+"/forgetPassword/?email="+email);
 				}
 
 				return "";
